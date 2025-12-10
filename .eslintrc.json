@@ -1,0 +1,214 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "allowImportExportEverywhere": false,
+    "codeFrame": true,
+    "ecmaVersion": 2020,
+    "project": "./tsconfig.json",
+    "sourceType": "module"
+  },
+  "settings": {
+    "import/resolver": {
+      "node": true,
+      "typescript": true
+    }
+  },
+  "env": {
+    "browser": true,
+    "es2020": true,
+    "jest": true,
+    "node": true
+  },
+  "globals": {
+    "exports": true,
+    "flowtype": false,
+    "module": true,
+    "require": true
+  },
+  "extends": [
+    "airbnb",
+    "airbnb-typescript",
+    "plugin:@typescript-eslint/recommended-type-checked",
+    "plugin:jest/recommended",
+    "plugin:jest/style",
+    "plugin:@next/next/recommended",
+    "plugin:import/recommended",
+    "plugin:import/typescript",
+    "plugin:perfectionist/recommended-natural-legacy",
+    "prettier"
+  ],
+  "plugins": [
+    "@typescript-eslint",
+    "async-await",
+    "import",
+    "jest",
+    "perfectionist",
+    "react-hooks",
+    "react"
+  ],
+  "overrides": [
+    {
+      "extends": ["plugin:@typescript-eslint/disable-type-checked"],
+      "files": ["./**/*.js", "./**/*.jsx", "./**/*.mjs"]
+    }
+  ],
+  "rules": {
+    // TODO(chris) [ALO-71] - These rules trigger many errors, and while fixing them is
+    //  something we should do, they are more complicated than the others, and will take
+    //  some time. See the followup task ALO-71.
+    "@typescript-eslint/no-base-to-string": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-unsafe-argument": "off",
+    "@typescript-eslint/no-unsafe-assignment": "off",
+    "@typescript-eslint/no-unsafe-call": "off",
+    "@typescript-eslint/no-unsafe-member-access": "off",
+    "@typescript-eslint/no-unsafe-return": "off",
+    // End TODO
+
+    "@typescript-eslint/consistent-type-imports": "error",
+    "@typescript-eslint/lines-between-class-members": "off",
+    "@typescript-eslint/naming-convention": [
+      "error",
+      {
+        "format": ["camelCase", "PascalCase", "UPPER_CASE"],
+        "leadingUnderscore": "allow",
+        "selector": "variable"
+      }
+    ],
+    "@typescript-eslint/no-throw-literal": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "@typescript-eslint/no-use-before-define": [
+      "error",
+      {
+        "functions": false
+      }
+    ],
+    "@typescript-eslint/only-throw-error": "error",
+    "arrow-body-style": ["off"],
+    "curly": ["error", "all"],
+    "func-names": ["warn", "as-needed"],
+    "import/extensions": [
+      "error",
+      "never",
+      {
+        "json": "always",
+        "scss": "always"
+      }
+    ],
+    "import/no-cycle": "off",
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": [
+          "**/*.test.{js,jsx,ts,tsx}",
+          "**/*.stories.{js,jsx,ts,tsx}",
+          "**/stories.{js,jsx,ts,tsx}",
+          ".storybook/**",
+          "utils/test/**/*.{js,ts}",
+          "utils/test-utils.tsx",
+          "jest.*.{js,ts}"
+        ],
+        "peerDependencies": true
+      }
+    ],
+    "import/no-named-as-default": "off",
+    "import/no-unresolved": [
+      "error",
+      {
+        "ignore": ["/~*"]
+      }
+    ],
+    "import/no-useless-path-segments": "error",
+    "import/prefer-default-export": ["off"],
+    "jsx-a11y/anchor-is-valid": "off",
+    "max-len": [
+      "error",
+      90,
+      2,
+      {
+        "ignoreComments": false,
+        "ignoreRegExpLiterals": true,
+        "ignoreStrings": true,
+        "ignoreTemplateLiterals": true,
+        "ignoreUrls": true
+      }
+    ],
+    "no-await-in-loop": "off",
+    "no-console": "off",
+    "no-restricted-syntax": [
+      "error",
+      {
+        "message": "for..in loops iterate over the entire prototype chain, which is virtually never what you want. Use Object.{keys,values,entries}, and iterate over the resulting array.",
+        "selector": "ForInStatement"
+      },
+      {
+        "message": "Labels are a form of GOTO; using them makes code confusing and hard to maintain and understand.",
+        "selector": "LabeledStatement"
+      },
+      {
+        "message": "`with` is disallowed in strict mode because it makes code impossible to predict and optimize.",
+        "selector": "WithStatement"
+      }
+    ],
+    "no-underscore-dangle": "off",
+    "no-use-before-define": "off",
+    "perfectionist/sort-imports": [
+      "error",
+      {
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          ["sibling", "parent"],
+          "index",
+          "unknown"
+        ],
+        "tsconfigRootDir": "./",
+        "type": "natural"
+      }
+    ],
+    "prefer-destructuring": [
+      "error",
+      {
+        "AssignmentExpression": {
+          "array": false,
+          "object": false
+        },
+        "VariableDeclarator": {
+          "array": false,
+          "object": true
+        }
+      },
+      {
+        "enforceForRenamedProperties": false
+      }
+    ],
+    "react-hooks/exhaustive-deps": "warn",
+    "react-hooks/rules-of-hooks": "error",
+    "react/destructuring-assignment": "off",
+    "react/jsx-filename-extension": [
+      "warn",
+      {
+        "extensions": [".js", ".jsx", ".tsx"]
+      }
+    ],
+    "react/jsx-props-no-spreading": "off",
+    "react/prefer-stateless-function": "warn",
+    "react/react-in-jsx-scope": "off",
+    "react/require-default-props": "off",
+    "react/sort-comp": [
+      "error",
+      {
+        "order": ["static-methods", "lifecycle", "everything-else", "render"]
+      }
+    ]
+  }
+}

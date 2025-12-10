@@ -1,0 +1,67 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@5.0.2
+
+commands:
+  login:
+    description: Log into GCP
+    parameters:
+      key:
+        type: string
+        default: 'GCLOUD_SERVICE_KEY'
+    steps:
+      - run:
+          name: Log into GCP
+          command: |
+            printf '%s\n' "$<< parameters.key >>" > ~/netsmile/gcloud-service-key.json
+            export GOOGLE_APPLICATION_CREDENTIALS=~/netsmile/gcloud-service-key.json
+            npx google-artifactregistry-auth --repo-config .npmrc --credential-config .npmrc
+
+jobs:
+  test:
+    machine: true
+    working_directory: ~/netsmile
+    steps:
+      - checkout
+      - node/install:
+          install-yarn: true
+          node-version: '20.15.1'
+          yarn-version: '1.22.22'
+      - login
+      - run:
+          name: Unit Tests and Lint
+          command: |
+            yarn install
+            yarn lint
+            yarn test
+            yarn build
+  docker:
+    machine: true
+    working_directory: ~/netsmile
+    steps:
+      - checkout
+      - deploy:
+          name: Build Docker
+          command: |
+            printf '%s\n' "$GCLOUD_SERVICE_KEY" > ~/netsmile/gcloud-service-key.json
+            docker build .
+
+workflows:
+  version: 2
+  test_and_build:
+    jobs:
+      - test:
+          context:
+            - Artifact Registry
+          filters:
+            branches:
+              ignore: /release-.*/
+      - docker:
+          context:
+            - Artifact Registry
+          filters:
+            branches:
+              ignore: /release-.*/
+          requires:
+            - test
