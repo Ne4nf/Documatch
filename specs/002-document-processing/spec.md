@@ -1,4 +1,4 @@
-# Feature Specification: Document Processing and Scanning
+# Feature Specification: Document Processing and Scanning - ver2
 
 **Feature Branch**: `002-document-processing`
 **Created**: 2025-01-14
