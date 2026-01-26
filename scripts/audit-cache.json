@@ -1,0 +1,1616 @@
+{
+  "metadata": {
+    "project_name": "asr-alpha-ui (documatch)",
+    "project_type": "single-package",
+    "language": "typescript",
+    "framework": "nextjs",
+    "analyzed_at": "2026-01-20T21:00:00Z",
+    "total_loc": 15850,
+    "file_count": 169
+  },
+  "global_context": {
+    "architecture_style": "Next.js App Router with component-based architecture. Organized by feature (document, document-type) with shared state management via Zustand stores. API communication through centralized client services.",
+    "primary_language": "TypeScript 5.6.3",
+    "state_management": "Zustand (vanilla stores) with provider pattern",
+    "api_pattern": "REST API via Next.js API routes and proxy routes (/api/tless, /api/user). Backend services: TemplatelessApiV2Client, UserServiceApiClient",
+    "auth_pattern": "Auth0 Next.js authentication (@auth0/nextjs-auth0 v3.5.0) with session-based JWT tokens",
+    "database": "External backend APIs (no direct database access). Document storage via Templateless API v2",
+    "testing_approach": "Jest with React Testing Library. Test files co-located with components (*.test.tsx)",
+    "common_patterns": [
+      "All API calls go through centralized TemplatelessApiV2Client or UserServiceApiClient",
+      "Error handling through custom error classes (ApiCallError, NotFoundError, etc.)",
+      "State management via Zustand stores with provider pattern at app level",
+      "Internationalization via next-intl with English/Japanese support",
+      "Styling via MUI (Material-UI) v6.1.4 with @emotion/styled",
+      "PDF rendering via PDF.js dist v3.4.120 and Konva for canvas manipulation",
+      "Date handling via Luxon v3.5.0",
+      "Notifications via notistack v3.0.1",
+      "Drag-and-drop via @dnd-kit v6.3.1",
+      "Form validation and document editing via @netsmile/page-edit-component v6.4.6"
+    ],
+    "tech_stack": {
+      "languages": ["TypeScript 5.6.3"],
+      "frameworks": [
+        "Next.js 14.2.15 (App Router)",
+        "React 18.3.1",
+        "Material-UI (MUI) 6.1.4",
+        "Zustand 5.0.0"
+      ],
+      "databases": ["External APIs (no direct DB)"],
+      "tools": [
+        "Jest 29.7.0",
+        "ESLint 8.57.1",
+        "Prettier 3.4.1",
+        "TypeScript 5.6.3",
+        "Husky 9.1.7",
+        "Auth0 Next.js SDK 3.5.0"
+      ]
+    }
+  },
+  "modules": [
+    {
+      "id": "document-management",
+      "name": "Document Management System",
+      "description": "Core module for managing document lifecycle: upload, scanning, viewing, editing, and exporting documents. Provides searchable document list with filtering and pagination.",
+      "type": "core-domain",
+      "paths": [
+        "src/components/Document",
+        "src/components/DocumentList",
+        "src/components/DocumentViewer",
+        "src/components/DocumentUploadDialog",
+        "src/app/document",
+        "src/app/document/[id]"
+      ],
+      "entry_point": "src/app/document/page.tsx:DocumentList()",
+      "loc": 3200,
+      "file_count": 28,
+      "key_functions": [
+        {
+          "name": "DocumentList",
+          "signature": "function DocumentList()",
+          "file": "src/components/DocumentList/DocumentList.tsx",
+          "line": 48,
+          "purpose": "Main document list component with search, filter, pagination logic"
+        },
+        {
+          "name": "searchDocuments",
+          "signature": "async searchDocuments(filters = {}, { sortBy, sortOrder }: Sorting, page = 1, pageSize = 10): Promise<DocumentSearchResults>",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "line": 592,
+          "purpose": "Search documents with filters, sorting, and pagination"
+        },
+        {
+          "name": "createDocument",
+          "signature": "async createDocument(file: File, definitionOrPromptId?: number | string, scanMode: ScanMode = 'llm')",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "line": 169,
+          "purpose": "Create new document entry and upload PDF file"
+        },
+        {
+          "name": "getDocument",
+          "signature": "async getDocument(id: number | string): Promise<RawDocument>",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "line": 353,
+          "purpose": "Retrieve full document details including pages and extracted data"
+        },
+        {
+          "name": "exportDocument",
+          "signature": "async exportDocument(documentId: string, format: MimeType, includeMetadata?: boolean): Promise<Blob>",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "line": 228,
+          "purpose": "Export document to CSV, Excel, or JSON format"
+        },
+        {
+          "name": "rescanDocument",
+          "signature": "async rescanDocument(documentId: number | string, useOcr: boolean)",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "line": 491,
+          "purpose": "Trigger re-scanning of document with optional OCR"
+        },
+        {
+          "name": "handleSavePageCorrections",
+          "signature": "const handleSavePageCorrections = async (correctedDocumentId: string): CallbackResult",
+          "file": "src/components/DocumentViewer/DocumentViewer.tsx",
+          "line": 92,
+          "purpose": "Save user corrections to extracted document data"
+        }
+      ],
+      "data_models": [
+        {
+          "name": "RawDocument",
+          "type": "interface (from @netsmile/page-edit-component)",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "fields": [
+            "id: string",
+            "name: string",
+            "status: DocumentStatus",
+            "pages: Page[]",
+            "pageGroups: PageGroup[]",
+            "createdAt: string",
+            "updatedAt: string"
+          ],
+          "purpose": "Core document model representing scanned documents with pages and extracted data"
+        },
+        {
+          "name": "SearchFilters",
+          "type": "interface",
+          "file": "src/types.ts",
+          "fields": [
+            "documentName: string | null",
+            "personInCharge: string | null",
+            "statuses: { [key: string]: boolean }",
+            "createdAtDateRange: [DateTime, DateTime]",
+            "updatedAtDateRange: [DateTime, DateTime]"
+          ],
+          "purpose": "Search filter parameters for document list queries"
+        },
+        {
+          "name": "DocumentStatus",
+          "type": "type union",
+          "file": "src/types.ts",
+          "fields": [
+            "PREPROCESSED",
+            "PREPROCESSED_DETECTION",
+            "PREPROCESSING_PENDING",
+            "PROCESSED",
+            "PROCESSING_ERROR",
+            "SCAN_ERROR",
+            "SCAN_PENDING",
+            "SCANNED",
+            "UNPROCESSED"
+          ],
+          "purpose": "Document processing status enumeration"
+        },
+        {
+          "name": "DocumentSearchResults",
+          "type": "interface",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "fields": [
+            "results: RawDocument[]",
+            "total: number",
+            "page: number",
+            "pageSize: number"
+          ],
+          "purpose": "Paginated search results for document queries"
+        }
+      ],
+      "dependencies": {
+        "internal": [
+          "src/services/api/TemplatelessApiV2",
+          "src/stores/global-data-store",
+          "src/stores/document-data-store",
+          "src/components/ResultData",
+          "src/components/DocumentRescan"
+        ],
+        "external": [
+          "@netsmile/page-edit-component",
+          "@mui/material",
+          "@mui/x-data-grid-pro",
+          "pdfjs-dist",
+          "konva",
+          "react-konva",
+          "next-intl",
+          "zustand",
+          "luxon"
+        ],
+        "calls_to": ["document-processing-api", "user-service-api"],
+        "called_by": ["app-routes", "page-layout"]
+      },
+      "api_contracts": [
+        {
+          "type": "REST",
+          "endpoint": "GET /documents/search",
+          "handler": "TemplatelessApiV2Client.searchDocuments()",
+          "request": "{ filters: SearchFilters, sortBy: string, sortOrder: string, page: number, pageSize: number }",
+          "response": "{ results: RawDocument[], total: number, page: number, pageSize: number }"
+        },
+        {
+          "type": "REST",
+          "endpoint": "POST /documents",
+          "handler": "TemplatelessApiV2Client.uploadDocument()",
+          "request": "FormData { file: File, origin: string, pdfConversionMethod: string, promptId: string, scanMode: string }",
+          "response": "{ id: string, status: string }"
+        },
+        {
+          "type": "REST",
+          "endpoint": "GET /documents/{id}",
+          "handler": "TemplatelessApiV2Client.getDocument()",
+          "request": "N/A",
+          "response": "RawDocument"
+        },
+        {
+          "type": "REST",
+          "endpoint": "PATCH /documents/{id}/pages/{pageId}/correction",
+          "handler": "TemplatelessApiV2Client.savePageCorrections()",
+          "request": "{ correctedItems: CorrectedItem[], correctedTables: CorrectedTable[] }",
+          "response": "RawDocument"
+        },
+        {
+          "type": "REST",
+          "endpoint": "GET /documents/{id}/export",
+          "handler": "TemplatelessApiV2Client.exportDocument()",
+          "request": "Accept header with MIME type",
+          "response": "Blob (CSV/Excel/JSON)"
+        }
+      ],
+      "integration_points": [
+        "Templateless API v2 (document storage, scanning, export)",
+        "PDF.js (PDF rendering and page display)",
+        "Auth0 (authentication for document access)",
+        "Next.js App Router (routing to document pages)"
+      ],
+      "complexity": "high",
+      "priority": 1,
+      "notes": [
+        "Largest and most complex module - core business domain",
+        "Handles entire document lifecycle from upload to export",
+        "Complex state management with multiple Zustand stores",
+        "Heavy integration with external page-edit-component library",
+        "PDF processing and OCR workflows",
+        "Real-time status tracking for document processing",
+        "Advanced table row detection and correction features"
+      ]
+    },
+    {
+      "id": "document-type-management",
+      "name": "Document Type (Prompt) Management System",
+      "description": "Manages document type definitions (prompts) that define how documents are scanned and what data is extracted. Supports creating prompts from scratch or from presets, with field-level configuration.",
+      "type": "core-domain",
+      "paths": [
+        "src/components/DocumentTypeList",
+        "src/components/DocumentTypeForm",
+        "src/components/DocumentTypeDetail",
+        "src/app/document-type",
+        "src/app/document-type/[id]"
+      ],
+      "entry_point": "src/app/document-type/page.tsx:DocumentTypeList()",
+      "loc": 2800,
+      "file_count": 24,
+      "key_functions": [
+        {
+          "name": "DocumentTypeListComponent",
+          "signature": "function DocumentTypeListComponent({ refreshId }: { refreshId?: string })",
+          "file": "src/components/DocumentTypeList/DocumentTypeList.tsx",
+          "line": 69,
+          "purpose": "Main document type list with search, filter, and CRUD operations"
+        },
+        {
+          "name": "searchPrompts",
+          "signature": "async searchPrompts(filters = {}, { sortBy, sortOrder }: Sorting, page = 1, pageSize = 10): Promise<PromptSearchResults>",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "line": 617,
+          "purpose": "Search document type prompts with filters and pagination"
+        },
+        {
+          "name": "createPrompt",
+          "signature": "async createPrompt(payload: PromptCreatePayload)",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "line": 193,
+          "purpose": "Create new document type prompt definition"
+        },
+        {
+          "name": "updatePrompt",
+          "signature": "async updatePrompt(id: number | string, payload: PromptUpdatePayload = {})",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "line": 667,
+          "purpose": "Update existing prompt configuration"
+        },
+        {
+          "name": "getPrompt",
+          "signature": "async getPrompt(id: number | string): Promise<Prompt>",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "line": 361,
+          "purpose": "Retrieve prompt details by ID"
+        },
+        {
+          "name": "getCopyPreset",
+          "signature": "async getCopyPreset(id: number | string): Promise<Prompt>",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "line": 338,
+          "purpose": "Copy a preset prompt to create a new custom prompt"
+        },
+        {
+          "name": "deletePrompt",
+          "signature": "async deletePrompt(id: number | string)",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "line": 220,
+          "purpose": "Delete a prompt definition"
+        }
+      ],
+      "data_models": [
+        {
+          "name": "Prompt",
+          "type": "interface (from @nstypes/templateless)",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "fields": [
+            "id: number",
+            "name: string",
+            "nameJpn: string | null",
+            "shortName: string | null",
+            "documentType: string",
+            "fieldsPrompt: PromptItem[]",
+            "tablePrompt: PromptItem[]",
+            "systemPrompt: string",
+            "extractTable: boolean",
+            "userCustomInstructions: string",
+            "createdAt: string",
+            "updatedAt: string"
+          ],
+          "purpose": "Document type definition that configures AI scanning parameters"
+        },
+        {
+          "name": "PromptItem",
+          "type": "interface (from @nstypes/templateless)",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "fields": [
+            "label: string",
+            "description: string",
+            "fieldType: string",
+            "required: boolean",
+            "validation: ValidationRule[]"
+          ],
+          "purpose": "Individual field definition within a prompt"
+        },
+        {
+          "name": "PromptCreatePayload",
+          "type": "interface",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "fields": [
+            "name: string",
+            "documentType: string",
+            "fieldsPrompt: PromptItem[]",
+            "tablePrompt: PromptItem[]",
+            "systemPrompt: string",
+            "extractTable: boolean",
+            "textualTablePrompt: string",
+            "userCustomInstructions: string"
+          ],
+          "purpose": "Payload for creating new prompt"
+        },
+        {
+          "name": "DocumentTypeSearchFilters",
+          "type": "interface",
+          "file": "src/types.ts",
+          "fields": [
+            "documentTypeName: string | null",
+            "createdBy: string | null",
+            "createdAtDateRange: [DateTime, DateTime]",
+            "updatedAtDateRange: [DateTime, DateTime]"
+          ],
+          "purpose": "Search filters for document type queries"
+        }
+      ],
+      "dependencies": {
+        "internal": [
+          "src/services/api/TemplatelessApiV2",
+          "src/stores/document-type-store",
+          "src/components/DocumentTypeForm",
+          "src/components/CustomDataGrid"
+        ],
+        "external": [
+          "@nstypes/templateless",
+          "@mui/material",
+          "@mui/x-data-grid-pro",
+          "next-intl",
+          "zustand",
+          "luxon"
+        ],
+        "calls_to": ["document-processing-api"],
+        "called_by": ["app-routes", "page-layout"]
+      },
+      "api_contracts": [
+        {
+          "type": "REST",
+          "endpoint": "GET /prompts/search",
+          "handler": "TemplatelessApiV2Client.searchPrompts()",
+          "request": "{ filters: object, sortBy: string, sortOrder: string, page: number, pageSize: number }",
+          "response": "{ results: Prompt[], total: number, page: number, pageSize: number }"
+        },
+        {
+          "type": "REST",
+          "endpoint": "POST /prompts/",
+          "handler": "TemplatelessApiV2Client.createPrompt()",
+          "request": "PromptCreatePayload",
+          "response": "Prompt"
+        },
+        {
+          "type": "REST",
+          "endpoint": "PATCH /prompts/{id}",
+          "handler": "TemplatelessApiV2Client.updatePrompt()",
+          "request": "PromptUpdatePayload",
+          "response": "Prompt"
+        },
+        {
+          "type": "REST",
+          "endpoint": "DELETE /prompts/{id}",
+          "handler": "TemplatelessApiV2Client.deletePrompt()",
+          "request": "N/A",
+          "response": "success message"
+        },
+        {
+          "type": "REST",
+          "endpoint": "GET /prompts/{id}/copyPreset",
+          "handler": "TemplatelessApiV2Client.getCopyPreset()",
+          "request": "N/A",
+          "response": "Prompt (copy)"
+        }
+      ],
+      "integration_points": [
+        "Templateless API v2 (prompt storage and management)",
+        "Document upload workflow (uses prompts for scanning)",
+        "User service (for user/creator filtering)"
+      ],
+      "complexity": "high",
+      "priority": 2,
+      "notes": [
+        "Secondary core domain - defines how documents are processed",
+        "Complex form builder with dynamic field configuration",
+        "Preset system for reusable document type templates",
+        "Table extraction configuration with AI prompts",
+        "Multi-language support (English/Japanese) for prompt names"
+      ]
+    },
+    {
+      "id": "document-processing-api-client",
+      "name": "Templateless API v2 Client",
+      "description": "Centralized API client for communicating with the backend Templateless document processing service. Handles all document and prompt CRUD operations, scanning, rescan, and export functionality.",
+      "type": "infrastructure",
+      "paths": [
+        "src/services/api/TemplatelessApiV2",
+        "src/services/api/types.ts",
+        "src/services/api/utils.ts",
+        "src/services/api/errors"
+      ],
+      "entry_point": "src/services/api/index.ts:getApiClient()",
+      "loc": 1200,
+      "file_count": 15,
+      "key_functions": [
+        {
+          "name": "TemplatelessApiV2Client constructor",
+          "signature": "constructor({ baseUrl, token }: ApiConfig)",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "line": 101,
+          "purpose": "Initialize API client with base URL and auth token"
+        },
+        {
+          "name": "searchDocuments",
+          "signature": "async searchDocuments(filters = {}, { sortBy, sortOrder }: Sorting, page = 1, pageSize = 10): Promise<DocumentSearchResults>",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "line": 592,
+          "purpose": "Search documents with pagination and filters"
+        },
+        {
+          "name": "uploadDocument",
+          "signature": "async uploadDocument(file: File, definitionOrPromptId: number | string, scanMode: ScanMode = 'llm')",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "line": 684,
+          "purpose": "Upload and process document with full workflow"
+        },
+        {
+          "name": "createDocument",
+          "signature": "async createDocument(file: File, definitionOrPromptId?: number | string, scanMode: ScanMode = 'llm')",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "line": 169,
+          "purpose": "Create document entry without immediate processing"
+        },
+        {
+          "name": "reprocessDocument",
+          "signature": "async reprocessDocument(documentId: number | string, pdfConversionMethod: PdfConversionMethod, scanAfterProcessing: boolean = true)",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "line": 450,
+          "purpose": "Reprocess document with different conversion settings"
+        },
+        {
+          "name": "rescanDocument",
+          "signature": "async rescanDocument(documentId: number | string, useOcr: boolean)",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "line": 491,
+          "purpose": "Trigger document rescanning with OCR option"
+        },
+        {
+          "name": "groupDocument",
+          "signature": "async groupDocument(documentId: number | string, groups: DocumentGroupItem[])",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "line": 385,
+          "purpose": "Create page groups for multi-page document processing"
+        },
+        {
+          "name": "savePageCorrections",
+          "signature": "async savePageCorrections(documentId: string, documentPageId: string, payload = {})",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "line": 566,
+          "purpose": "Save user corrections to extracted page data"
+        },
+        {
+          "name": "searchPrompts",
+          "signature": "async searchPrompts(filters = {}, { sortBy, sortOrder }: Sorting, page = 1, pageSize = 10): Promise<PromptSearchResults>",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "line": 617,
+          "purpose": "Search prompt definitions"
+        },
+        {
+          "name": "createPrompt",
+          "signature": "async createPrompt(payload: PromptCreatePayload)",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "line": 193,
+          "purpose": "Create new prompt definition"
+        },
+        {
+          "name": "abortRequest",
+          "signature": "abortRequest(requestId: string, documentId?: string)",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "line": 107,
+          "purpose": "Abort in-progress API requests with optional document cleanup"
+        },
+        {
+          "name": "iterateSearchPages",
+          "signature": "async iterateSearchPages<T>(fetchPage: (page: number, pageSize: number) => Promise<SearchResults<T>>): Promise<T[]>",
+          "file": "src/services/api/utils.ts",
+          "line": "N/A",
+          "purpose": "Utility to fetch all pages of paginated search results"
+        },
+        {
+          "name": "throwIfError",
+          "signature": "throwIfError(response: Response, resourceType?: string, resourceId?: string, customMessage?: string)",
+          "file": "src/services/api/utils.ts",
+          "line": "N/A",
+          "purpose": "Centralized error handling for API responses"
+        }
+      ],
+      "data_models": [
+        {
+          "name": "TemplatelessApiV2Client",
+          "type": "class",
+          "file": "src/services/api/TemplatelessApiV2/TemplatelessApiV2Client.ts",
+          "fields": [
+            "baseUrl: string | null",
+            "token: string | null",
+            "controllers: Map<string, AbortController>"
+          ],
+          "purpose": "Main API client class with all backend communication methods"
+        },
+        {
+          "name": "ApiCallError",
+          "type": "class (extends Error)",
+          "file": "src/services/api/errors/ApiCallError.ts",
+          "fields": [
+            "message: string",
+            "statusCode: number",
+            "resourceType: string",
+            "resourceId: string"
+          ],
+          "purpose": "Base error class for API call failures"
+        },
+        {
+          "name": "DocumentNotFoundError",
+          "type": "class (extends ApiCallError)",
+          "file": "src/services/api/errors/DocumentNotFoundError.ts",
+          "fields": ["inherited from ApiCallError"],
+          "purpose": "Error thrown when document is not found (404)"
+        },
+        {
+          "name": "PromptNotFoundError",
+          "type": "class (extends ApiCallError)",
+          "file": "src/services/api/errors/PromptNotFoundError.ts",
+          "fields": ["inherited from ApiCallError"],
+          "purpose": "Error thrown when prompt is not found (404)"
+        },
+        {
+          "name": "SearchResults",
+          "type": "generic interface",
+          "file": "src/services/api/utils.ts",
+          "fields": [
+            "results: T",
+            "total: number",
+            "page: number",
+            "pageSize: number"
+          ],
+          "purpose": "Generic paginated search result wrapper"
+        }
+      ],
+      "dependencies": {
+        "internal": [],
+        "external": [
+          "@nstypes/templateless",
+          "@netsmile/page-edit-component"
+        ],
+        "calls_to": ["backend-templateless-api"],
+        "called_by": ["document-management", "document-type-management", "all-components"]
+      },
+      "api_contracts": [
+        {
+          "type": "REST",
+          "endpoint": "All /documents/* and /prompts/* endpoints",
+          "handler": "TemplatelessApiV2Client methods",
+          "request": "various (FormData, JSON, query params)",
+          "response": "various (JSON, Blob)"
+        }
+      ],
+      "integration_points": [
+        "Next.js API proxy routes (/api/tless/*)",
+        "Auth0 session management (JWT token injection)",
+        "Browser Fetch API for HTTP requests"
+      ],
+      "complexity": "high",
+      "priority": 3,
+      "notes": [
+        "Critical infrastructure module - all data flows through here",
+        "400+ lines of API methods",
+        "Custom error hierarchy for different failure scenarios",
+        "Request abort controller support for cancelling uploads/scans",
+        "Server-side and client-side client factories",
+        "Pagination utility for fetching all results",
+        "Supports multiple export formats (CSV, Excel, JSON)"
+      ]
+    },
+    {
+      "id": "user-service-api-client",
+      "name": "User Service API Client",
+      "description": "API client for user management backend. Handles user information, organization data, and authentication-related operations like password reset and email verification.",
+      "type": "infrastructure",
+      "paths": [
+        "src/services/api/UserServiceApi"
+      ],
+      "entry_point": "src/services/api/index.ts:getUserServiceApiClient()",
+      "loc": 200,
+      "file_count": 2,
+      "key_functions": [
+        {
+          "name": "UserServiceApiClient constructor",
+          "signature": "constructor({ baseUrl, token }: ApiConfig)",
+          "file": "src/services/api/UserServiceApi/UserServiceApiClient.ts",
+          "line": 65,
+          "purpose": "Initialize user service API client"
+        },
+        {
+          "name": "getUsers",
+          "signature": "async getUsers(organizationId: number | string)",
+          "file": "src/services/api/UserServiceApi/UserServiceApiClient.ts",
+          "line": 74,
+          "purpose": "Get all users in an organization"
+        },
+        {
+          "name": "userInfo",
+          "signature": "async userInfo(): Promise<UserInfo>",
+          "file": "src/services/api/UserServiceApi/UserServiceApiClient.ts",
+          "line": 169,
+          "purpose": "Get current logged-in user information"
+        },
+        {
+          "name": "organizationOptions",
+          "signature": "async organizationOptions(organizationId: number | string): Promise<OrganizationOptions>",
+          "file": "src/services/api/UserServiceApi/UserServiceApiClient.ts",
+          "line": 119,
+          "purpose": "Get organization configuration options"
+        },
+        {
+          "name": "sendPasswordResetEmail",
+          "signature": "async sendPasswordResetEmail()",
+          "file": "src/services/api/UserServiceApi/UserServiceApiClient.ts",
+          "line": 136,
+          "purpose": "Trigger password reset email for current user"
+        },
+        {
+          "name": "sendVerificationEmail",
+          "signature": "async sendVerificationEmail()",
+          "file": "src/services/api/UserServiceApi/UserServiceApiClient.ts",
+          "line": 153,
+          "purpose": "Trigger email verification for current user"
+        }
+      ],
+      "data_models": [
+        {
+          "name": "User",
+          "type": "interface",
+          "file": "src/services/api/UserServiceApi/UserServiceApiClient.ts",
+          "fields": [
+            "id: string",
+            "globalId: string",
+            "email: string",
+            "name: string",
+            "organizationId: string",
+            "roleId: string",
+            "createdAt: string",
+            "updatedAt: string",
+            "locked: boolean",
+            "deleted: boolean"
+          ],
+          "purpose": "User entity from user service"
+        },
+        {
+          "name": "UserInfo",
+          "type": "interface",
+          "file": "src/services/api/UserServiceApi/UserServiceApiClient.ts",
+          "fields": [
+            "id: string",
+            "email: string | null",
+            "name: string",
+            "organizationId: string",
+            "organizationName: string",
+            "roleId: string",
+            "roleName: string",
+            "accesses: Accesses[]",
+            "mfaStatus: string | null"
+          ],
+          "purpose": "Extended user information with organization and role details"
+        },
+        {
+          "name": "Organization",
+          "type": "interface",
+          "file": "src/services/api/UserServiceApi/UserServiceApiClient.ts",
+          "fields": [
+            "id: string",
+            "name: string",
+            "domain: string",
+            "sftpUsername: string",
+            "locked: boolean",
+            "deleted: boolean",
+            "protected: boolean",
+            "internal: boolean"
+          ],
+          "purpose": "Organization entity"
+        },
+        {
+          "name": "OrganizationOptions",
+          "type": "interface",
+          "file": "src/services/api/UserServiceApi/UserServiceApiClient.ts",
+          "fields": [
+            "hideASRAlphaUploadUI: boolean",
+            "other config options..."
+          ],
+          "purpose": "Organization-specific configuration flags"
+        }
+      ],
+      "dependencies": {
+        "internal": [],
+        "external": [],
+        "calls_to": ["backend-user-service-api"],
+        "called_by": ["document-management", "document-type-management", "app-routes"]
+      },
+      "api_contracts": [
+        {
+          "type": "REST",
+          "endpoint": "GET /user/search",
+          "handler": "UserServiceApiClient.getUsers()",
+          "request": "{ organizationId: string, page: number, pageSize: number }",
+          "response": "{ results: User[] }"
+        },
+        {
+          "type": "REST",
+          "endpoint": "GET /user/current",
+          "handler": "UserServiceApiClient.userInfo()",
+          "request": "N/A",
+          "response": "UserInfo"
+        },
+        {
+          "type": "REST",
+          "endpoint": "GET /organization/{id}/options/ui",
+          "handler": "UserServiceApiClient.organizationOptions()",
+          "request": "N/A",
+          "response": "OrganizationOptions"
+        }
+      ],
+      "integration_points": [
+        "Auth0 session management (JWT token)",
+        "Next.js API proxy routes (/api/user/*)"
+      ],
+      "complexity": "low",
+      "priority": 4,
+      "notes": [
+        "Simple CRUD client for user management",
+        "Used primarily for filtering documents/prompts by creator",
+        "Organization options control UI feature flags"
+      ]
+    },
+    {
+      "id": "state-management",
+      "name": "Global State Management (Zustand)",
+      "description": "Centralized state management using Zustand vanilla stores with React provider pattern. Manages global application state including search results, filters, pagination, and user/organization data.",
+      "type": "infrastructure",
+      "paths": [
+        "src/stores",
+        "src/providers"
+      ],
+      "entry_point": "src/app/layout.tsx (providers wrap app)",
+      "loc": 300,
+      "file_count": 6,
+      "key_functions": [
+        {
+          "name": "createGlobalDataStore",
+          "signature": "export const createGlobalDataStore = (initState: GlobalDataState) => createStore<GlobalDataStore>()",
+          "file": "src/stores/global-data-store.ts",
+          "line": 42,
+          "purpose": "Create Zustand store for global document list state"
+        },
+        {
+          "name": "createDocumentTypeStore",
+          "signature": "export const createDocumentTypeStore = (initState: DocumentTypeState) => createStore<DocumentTypeStore>()",
+          "file": "src/stores/document-type-store.ts",
+          "line": 37,
+          "purpose": "Create Zustand store for document type list state"
+        },
+        {
+          "name": "createDocumentDataStore",
+          "signature": "export const createDocumentDataStore = (initState: DocumentDataState) => createStore<DocumentDataStore>()",
+          "file": "src/stores/document-data-store.ts",
+          "line": 16,
+          "purpose": "Create Zustand store for individual document viewing state"
+        },
+        {
+          "name": "useGlobalDataStore",
+          "signature": "export const useGlobalDataStore = (selector?: (state: GlobalDataStore) => T)",
+          "file": "src/providers/global-data-store-provider.tsx",
+          "line": "N/A",
+          "purpose": "React hook to access global document store"
+        },
+        {
+          "name": "useDocumentTypeStore",
+          "signature": "export const useDocumentTypeStore = (selector?: (state: DocumentTypeStore) => T)",
+          "file": "src/providers/document-type-store-provider.tsx",
+          "line": "N/A",
+          "purpose": "React hook to access document type store"
+        },
+        {
+          "name": "useDocumentDataStore",
+          "signature": "export const useDocumentDataStore = (selector?: (state: DocumentDataStore) => T)",
+          "file": "src/providers/document-data-store-provider.tsx",
+          "line": "N/A",
+          "purpose": "React hook to access document data store"
+        }
+      ],
+      "data_models": [
+        {
+          "name": "GlobalDataState",
+          "type": "interface",
+          "file": "src/stores/global-data-store.ts",
+          "fields": [
+            "definitions: Definition[]",
+            "prompts: Prompt[]",
+            "users: User[]",
+            "userInfo: UserInfo",
+            "organizationOptions: OrganizationOptions",
+            "searchResults: DocumentSearchResults[]",
+            "searchFilters: SearchFilters",
+            "page: number",
+            "rowsPerPage: number",
+            "sortColumn: DocumentTableSortColumns",
+            "sortDirection: TableSortDirection"
+          ],
+          "purpose": "Global state for document list view"
+        },
+        {
+          "name": "DocumentTypeState",
+          "type": "interface",
+          "file": "src/stores/document-type-store.ts",
+          "fields": [
+            "presetPrompts: Prompt[]",
+            "users: User[]",
+            "searchResults: PromptSearchResults[]",
+            "documentTypeSearchFilters: DocumentTypeSearchFilters",
+            "page: number",
+            "rowsPerPage: number",
+            "sortColumn: DocumentTypeTableSortColumns",
+            "sortDirection: TableSortDirection"
+          ],
+          "purpose": "State for document type list view"
+        },
+        {
+          "name": "DocumentDataState",
+          "type": "interface",
+          "file": "src/stores/document-data-store.ts",
+          "fields": [
+            "rawDocument: any"
+          ],
+          "purpose": "State for individual document viewing"
+        }
+      ],
+      "dependencies": {
+        "internal": ["src/services/api"],
+        "external": ["zustand"],
+        "calls_to": [],
+        "called_by": ["all-components"]
+      },
+      "api_contracts": [],
+      "integration_points": [
+        "React Context API (provider pattern)",
+        "All major components hook into stores"
+      ],
+      "complexity": "medium",
+      "priority": 5,
+      "notes": [
+        "Clean separation of concerns with 3 distinct stores",
+        "Vanilla Zustand (no Redux middleware)",
+        "Provider pattern allows server-side initialization",
+        "Pagination caching with array-based page storage"
+      ]
+    },
+    {
+      "id": "document-viewing-and-editing",
+      "name": "Document Viewing and Editing UI",
+      "description": "Interactive document viewer with PDF page display, thumbnail navigation, split-pane layout, and inline editing capabilities. Supports field corrections, table editing, and page grouping.",
+      "type": "ui",
+      "paths": [
+        "src/components/DocumentViewer",
+        "src/components/Document",
+        "src/components/ResultData",
+        "src/components/DocumentRescan"
+      ],
+      "entry_point": "src/components/DocumentViewer/DocumentViewer.tsx:DocumentViewer()",
+      "loc": 2100,
+      "file_count": 27,
+      "key_functions": [
+        {
+          "name": "DocumentViewer",
+          "signature": "export default function DocumentViewer()",
+          "file": "src/components/DocumentViewer/DocumentViewer.tsx",
+          "line": 40,
+          "purpose": "Main document viewer with split-pane layout (thumbnails, PDF, extracted data)"
+        },
+        {
+          "name": "Document",
+          "signature": "export default function Document()",
+          "file": "src/components/Document/Document.tsx",
+          "line": "N/A",
+          "purpose": "Document page wrapper with layout and providers"
+        },
+        {
+          "name": "DocumentHeader",
+          "signature": "export default function DocumentHeader()",
+          "file": "src/components/Document/DocumentHeader/DocumentHeader.tsx",
+          "line": "N/A",
+          "purpose": "Document header with actions (download, feedback, rescan, group)"
+        },
+        {
+          "name": "DocumentNavigation",
+          "signature": "export default function DocumentNavigation()",
+          "file": "src/components/Document/DocumentHeader/DocumentNavigation.tsx",
+          "line": "N/A",
+          "purpose": "Page/group navigation controls"
+        },
+        {
+          "name": "ResultData",
+          "signature": "export default function ResultData()",
+          "file": "src/components/ResultData/TableView/TableView.tsx",
+          "line": "N/A",
+          "purpose": "Editable table view of extracted data"
+        },
+        {
+          "name": "FieldView",
+          "signature": "export default function FieldView()",
+          "file": "src/components/ResultData/FieldView/FieldView.tsx",
+          "line": "N/A",
+          "purpose": "Field-based view of extracted data with inline editing"
+        },
+        {
+          "name": "DocumentRescanModal",
+          "signature": "export default function DocumentRescanModal()",
+          "file": "src/components/DocumentRescan/DocumentRescanModal.tsx",
+          "line": "N/A",
+          "purpose": "Modal for triggering document/page rescans with OCR options"
+        },
+        {
+          "name": "DocumentCustomGrouping",
+          "signature": "export default function DocumentCustomGrouping()",
+          "file": "src/components/DocumentRescan/DocumentCustomGrouping.tsx",
+          "line": "N/A",
+          "purpose": "UI for creating custom page groups"
+        },
+        {
+          "name": "handleSavePageCorrections",
+          "signature": "const handleSavePageCorrections = async (correctedDocumentId: string): CallbackResult",
+          "file": "src/components/DocumentViewer/DocumentViewer.tsx",
+          "line": 92,
+          "purpose": "Save corrections to individual page data"
+        },
+        {
+          "name": "handleSaveGroupsCorrections",
+          "signature": "const handleSaveGroupsCorrections = async (correctedDocumentId: string): CallbackResult",
+          "file": "src/components/DocumentViewer/DocumentViewer.tsx",
+          "line": 75,
+          "purpose": "Save corrections to grouped page data"
+        }
+      ],
+      "data_models": [
+        {
+          "name": "GroupedThumbnail",
+          "type": "interface",
+          "file": "src/components/DocumentViewer/DocumentViewer.tsx",
+          "fields": [
+            "groupId: string",
+            "pages: number[]",
+            "imageUrls: string[]",
+            "thumbnailUrl: string"
+          ],
+          "purpose": "Thumbnail representation of page groups"
+        },
+        {
+          "name": "CorrectedItemWithId",
+          "type": "interface",
+          "file": "src/components/ResultData/types.ts",
+          "fields": [
+            "id: string",
+            "label: string",
+            "value: string",
+            "confidence: number",
+            "bbox: BoundingBox"
+          ],
+          "purpose": "Extracted field with user corrections"
+        },
+        {
+          "name": "CallbackResult",
+          "type": "type (from @netsmile/page-edit-component)",
+          "file": "N/A (external library)",
+          "fields": [
+            "success: boolean",
+            "error?: Error"
+          ],
+          "purpose": "Return type for save callbacks"
+        }
+      ],
+      "dependencies": {
+        "internal": [
+          "src/services/api",
+          "src/stores/document-data-store",
+          "src/components/DocumentRescan"
+        ],
+        "external": [
+          "@netsmile/page-edit-component",
+          "@mui/material",
+          "@dnd-kit/core",
+          "split-pane-react",
+          "pdfjs-dist",
+          "konva",
+          "react-konva"
+        ],
+        "calls_to": ["document-processing-api-client"],
+        "called_by": ["document-management"]
+      },
+      "api_contracts": [
+        {
+          "type": "REST",
+          "endpoint": "PATCH /documents/{id}/pages/{pageId}/correction",
+          "handler": "TemplatelessApiV2Client.savePageCorrections()",
+          "request": "{ correctedItems, correctedTables }",
+          "response": "RawDocument"
+        },
+        {
+          "type": "REST",
+          "endpoint": "PATCH /documents/{id}/groups/{groupId}/correction",
+          "handler": "TemplatelessApiV2Client.saveGroupCorrections()",
+          "request": "{ correctedItems, correctedTables }",
+          "response": "RawDocument"
+        },
+        {
+          "type": "REST",
+          "endpoint": "POST /documents/{id}/rescan",
+          "handler": "TemplatelessApiV2Client.rescanDocument()",
+          "request": "{ useOcr: boolean }",
+          "response": "RawDocument"
+        }
+      ],
+      "integration_points": [
+        "@netsmile/page-edit-component (document editing canvas)",
+        "PDF.js (PDF rendering)",
+        "Konva (canvas manipulation)",
+        "split-pane-react (layout management)"
+      ],
+      "complexity": "high",
+      "priority": 6,
+      "notes": [
+        "Most complex UI module with interactive editing",
+        "Split-pane layout with resizable sections",
+        "Real-time correction saving",
+        "Drag-and-drop page grouping",
+        "PDF thumbnail generation and navigation",
+        "Heavy integration with external page-edit-component"
+      ]
+    },
+    {
+      "id": "shared-ui-components",
+      "name": "Shared UI Components Library",
+      "description": "Reusable UI components used across the application. Includes buttons, modals, data grids, date pickers, dropdowns, loaders, and layout components.",
+      "type": "ui",
+      "paths": [
+        "src/components/Buttons",
+        "src/components/Checkbox",
+        "src/components/CustomAutocomplete",
+        "src/components/CustomDataGrid",
+        "src/components/CustomModal",
+        "src/components/DateRangePicker",
+        "src/components/Dropzone",
+        "src/components/ErrorPage",
+        "src/components/Loaders",
+        "src/components/Modals",
+        "src/components/PageLayout",
+        "src/components/Table",
+        "src/components/Tabs",
+        "src/components/TextField",
+        "src/components/TextLabel",
+        "src/components/ValidateField"
+      ],
+      "entry_point": "N/A (imported by various components)",
+      "loc": 1800,
+      "file_count": 68,
+      "key_functions": [
+        {
+          "name": "CustomDataGrid",
+          "signature": "export default function CustomDataGrid<T>({ columns, rows, ...props }: CustomDataGridProps<T>)",
+          "file": "src/components/CustomDataGrid/CustomDataGrid.tsx",
+          "line": "N/A",
+          "purpose": "Reusable data grid with MUI X DataGridPro"
+        },
+        {
+          "name": "DateRangePicker",
+          "signature": "export default function DateRangePicker({ value, onChange, ...props }: DateRangePickerProps)",
+          "file": "src/components/DateRangePicker/DateRangePicker.tsx",
+          "line": "N/A",
+          "purpose": "Date range selection with Luxon integration"
+        },
+        {
+          "name": "Dropzone",
+          "signature": "export default function Dropzone({ onDrop, accept, ...props }: DropzoneProps)",
+          "file": "src/components/Dropzone/Dropzone.tsx",
+          "line": "N/A",
+          "purpose": "Drag-and-drop file upload zone"
+        },
+        {
+          "name": "CustomModal",
+          "signature": "export default function CustomModal({ open, onClose, children, ...props }: CustomModalProps)",
+          "file": "src/components/CustomModal/CustomModal.tsx",
+          "line": "N/A",
+          "purpose": "Reusable modal dialog component"
+        },
+        {
+          "name": "Sidebar",
+          "signature": "function Sidebar({ open }: SidebarProps)",
+          "file": "src/components/PageLayout/Sidebar/Sidebar.tsx",
+          "line": 29,
+          "purpose": "Application sidebar navigation"
+        },
+        {
+          "name": "Header",
+          "signature": "function Header({ handleDrawerOpen, open }: HeaderProps)",
+          "file": "src/components/PageLayout/Header/Header.tsx",
+          "line": "N/A",
+          "purpose": "Application header with hamburger menu"
+        },
+        {
+          "name": "OverlaySpinner",
+          "signature": "export default function OverlaySpinner()",
+          "file": "src/components/Loaders/OverlaySpinner.tsx",
+          "line": "N/A",
+          "purpose": "Full-screen loading spinner overlay"
+        }
+      ],
+      "data_models": [
+        {
+          "name": "ColumnItemProps",
+          "type": "interface",
+          "file": "src/components/Table/types.ts",
+          "fields": [
+            "field: string",
+            "headerName: string",
+            "width: number",
+            "renderCell?: (props) => ReactNode",
+            "sortable?: boolean",
+            "filterable?: boolean"
+          ],
+          "purpose": "Column definition for data tables"
+        },
+        {
+          "name": "CustomModalProps",
+          "type": "interface",
+          "file": "src/components/CustomModal/CustomModal.tsx",
+          "fields": [
+            "open: boolean",
+            "onClose: () => void",
+            "title: string",
+            "children: ReactNode",
+            "maxWidth?: 'sm' | 'md' | 'lg' | 'xl'"
+          ],
+          "purpose": "Props for modal component"
+        }
+      ],
+      "dependencies": {
+        "internal": ["src/constants"],
+        "external": [
+          "@mui/material",
+          "@mui/x-data-grid-pro",
+          "@mui/x-date-pickers-pro",
+          "react-dropzone",
+          "luxon"
+        ],
+        "calls_to": [],
+        "called_by": ["all-ui-modules"]
+      },
+      "api_contracts": [],
+      "integration_points": [
+        "Material-UI theming system",
+        "next-intl for translations"
+      ],
+      "complexity": "low",
+      "priority": 7,
+      "notes": [
+        "Well-organized component library",
+        "Consistent styling via MUI",
+        "Good test coverage (co-located test files)",
+        "PageLayout components provide consistent app structure"
+      ]
+    },
+    {
+      "id": "authentication-and-authorization",
+      "name": "Authentication and Authorization",
+      "description": "Auth0-based authentication with session management. Protects routes using withPageAuthRequired HOC. Integrates with user service for role-based access control.",
+      "type": "integration",
+      "paths": [
+        "src/app/api/auth/[auth0]",
+        "src/providers"
+      ],
+      "entry_point": "src/app/api/auth/[auth0]/route.ts",
+      "loc": 150,
+      "file_count": 3,
+      "key_functions": [
+        {
+          "name": "getSession",
+          "signature": "async function getSession(): Promise<Session | null | undefined>",
+          "file": "N/A (Auth0 library)",
+          "line": "N/A",
+          "purpose": "Get Auth0 session server-side for token extraction"
+        },
+        {
+          "name": "withPageAuthRequired",
+          "signature": "withPageAuthRequired(Component: NextPage, options?: { returnTo: string })",
+          "file": "N/A (Auth0 library)",
+          "line": "N/A",
+          "purpose": "HOC to protect pages requiring authentication"
+        },
+        {
+          "name": "useUser",
+          "signature": "const { user, isLoading, error } = useUser()",
+          "file": "N/A (Auth0 library)",
+          "line": "N/A",
+          "purpose": "Client-side hook to access user data"
+        }
+      ],
+      "data_models": [
+        {
+          "name": "Session",
+          "type": "interface (from @auth0/nextjs-auth0)",
+          "file": "N/A (external library)",
+          "fields": [
+            "user: User",
+            "idToken: string",
+            "accessToken: string",
+            "expiresAt: number"
+          ],
+          "purpose": "Auth0 session with JWT tokens"
+        }
+      ],
+      "dependencies": {
+        "internal": ["src/services/api"],
+        "external": [
+          "@auth0/nextjs-auth0"
+        ],
+        "calls_to": ["auth0-service"],
+        "called_by": ["all-routes", "api-clients"]
+      },
+      "api_contracts": [
+        {
+          "type": "OAuth2",
+          "endpoint": "Auth0 OAuth endpoints",
+          "handler": "Auth0 SDK",
+          "request": "OAuth2 flows",
+          "response": "JWT tokens"
+        }
+      ],
+      "integration_points": [
+        "Auth0 authentication service",
+        "User service (for role/permission data)",
+        "Next.js API routes (/api/auth/login, /api/auth/logout)"
+      ],
+      "complexity": "low",
+      "priority": 8,
+      "notes": [
+        "Simple Auth0 integration with nextjs-auth0 SDK",
+        "Session-based authentication with JWT tokens",
+        "Server-side session for API calls",
+        "Client-side hooks for UI"
+      ]
+    },
+    {
+      "id": "internationalization",
+      "name": "Internationalization (i18n)",
+      "description": "Multi-language support using next-intl. Supports English and Japanese locales with translation keys for UI text.",
+      "type": "infrastructure",
+      "paths": [
+        "src/i18n",
+        "messages"
+      ],
+      "entry_point": "src/i18n/request.ts",
+      "loc": 100,
+      "file_count": 5,
+      "key_functions": [
+        {
+          "name": "getTranslations",
+          "signature": "const t = useTranslations(namespace: string)",
+          "file": "N/A (next-intl library)",
+          "line": "N/A",
+          "purpose": "Hook to access translations for a namespace"
+        },
+        {
+          "name": "getRequestConfig",
+          "signature": "export default getRequestConfig({ requestLocale }): Promise<{ messages, locale }>",
+          "file": "src/i18n/request.ts",
+          "line": "N/A",
+          "purpose": "Server-side i18n configuration for Next.js"
+        }
+      ],
+      "data_models": [
+        {
+          "name": "Messages",
+          "type": "JSON structure",
+          "file": "messages/en.json, messages/ja.json",
+          "fields": [
+            "DocumentList: { ... }",
+            "DocumentTypeList: { ... }",
+            "Document: { ... }",
+            "Sidebar: { ... }",
+            "etc."
+          ],
+          "purpose": "Translation key-value pairs organized by namespace"
+        }
+      ],
+      "dependencies": {
+        "internal": [],
+        "external": [
+          "next-intl"
+        ],
+        "calls_to": [],
+        "called_by": ["all-components"]
+      },
+      "api_contracts": [],
+      "integration_points": [
+        "Next.js middleware for locale detection",
+        "Browser locale detection"
+      ],
+      "complexity": "low",
+      "priority": 9,
+      "notes": [
+        "Simple next-intl integration",
+        "JSON-based translation files in messages/ directory",
+        "Namespaced translations (e.g., 'DocumentList.title')"
+      ]
+    },
+    {
+      "id": "utility-functions",
+      "name": "Utility Functions and Constants",
+      "description": "Shared utility functions for date formatting, error handling, filter transformation, and application constants (paths, MIME types, statuses).",
+      "type": "utility",
+      "paths": [
+        "src/utils.ts",
+        "src/constants.ts",
+        "src/hooks",
+        "src/components/DocumentRescan/utils.ts",
+        "src/components/DocumentTypeList/utils.ts",
+        "src/services/api/utils.ts"
+      ],
+      "entry_point": "src/utils.ts",
+      "loc": 400,
+      "file_count": 10,
+      "key_functions": [
+        {
+          "name": "extractErrorMessage",
+          "signature": "function extractErrorMessage(error: unknown, fallbackMessage: string = 'An unknown error occurred.'): string",
+          "file": "src/utils.ts",
+          "line": 14,
+          "purpose": "Extract error message from Error object or unknown type"
+        },
+        {
+          "name": "formatDate",
+          "signature": "function formatDate(date: string, format = DATE_FORMATS.DATETIME)",
+          "file": "src/utils.ts",
+          "line": 33,
+          "purpose": "Format ISO date string using Luxon"
+        },
+        {
+          "name": "transformSearchFiltersToSearchParams",
+          "signature": "function transformSearchFiltersToSearchParams(filters: SearchFilters)",
+          "file": "src/utils.ts",
+          "line": 85,
+          "purpose": "Transform UI filter state to API query parameters"
+        },
+        {
+          "name": "transformPromptFiltersToPromptParams",
+          "signature": "function transformPromptFiltersToPromptParams(filters: DocumentTypeSearchFilters)",
+          "file": "src/utils.ts",
+          "line": 58,
+          "purpose": "Transform document type filters to API parameters"
+        },
+        {
+          "name": "removeEmptyItems",
+          "signature": "function removeEmptyItems(obj: ArrayLike<unknown> | { [s: string]: unknown })",
+          "file": "src/utils.ts",
+          "line": 37,
+          "purpose": "Remove null/undefined/empty values from objects"
+        },
+        {
+          "name": "splitFilename",
+          "signature": "function splitFilename(filename: string)",
+          "file": "src/utils.ts",
+          "line": 45,
+          "purpose": "Split filename into base name and extension"
+        },
+        {
+          "name": "useDisclosure",
+          "signature": "function useDisclosure(initialState = false)",
+          "file": "src/hooks/useDisclosure.ts",
+          "line": "N/A",
+          "purpose": "Custom hook for modal open/close state management"
+        },
+        {
+          "name": "useWindowSize",
+          "signature": "function useWindowSize()",
+          "file": "src/hooks/useWindowSize.ts",
+          "line": "N/A",
+          "purpose": "Custom hook to track browser window dimensions"
+        }
+      ],
+      "data_models": [
+        {
+          "name": "PATHS",
+          "type": "const object",
+          "file": "src/constants.ts",
+          "fields": [
+            "DOCUMENT: '/document'",
+            "DOCUMENT_TYPE: '/document-type'",
+            "ROOT: '/'"
+          ],
+          "purpose": "Application route path constants"
+        },
+        {
+          "name": "MIME_TYPES",
+          "type": "const object",
+          "file": "src/constants.ts",
+          "fields": [
+            "CSV: 'text/csv'",
+            "EXCEL: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'",
+            "JSON: 'application/json'"
+          ],
+          "purpose": "Supported export MIME types"
+        },
+        {
+          "name": "DOCUMENT_STATUS",
+          "type": "const object (frozen)",
+          "file": "src/constants.ts",
+          "fields": [
+            "SCANNED: 'scanned'",
+            "PROCESSING_PENDING: 'processingPending'",
+            "SCAN_ERROR: 'scanError'",
+            "etc."
+          ],
+          "purpose": "Document processing status enumeration"
+        },
+        {
+          "name": "DATE_FORMATS",
+          "type": "const object",
+          "file": "src/constants.ts",
+          "fields": [
+            "DATE: 'yyyy/MM/dd'",
+            "DATETIME: 'yyyy/MM/dd HH:mm'",
+            "SEARCH_FILTER: 'yyyy-MM-dd HH:mm'"
+          ],
+          "purpose": "Date format strings for Luxon"
+        }
+      ],
+      "dependencies": {
+        "internal": [],
+        "external": [
+          "luxon"
+        ],
+        "calls_to": [],
+        "called_by": ["all-modules"]
+      },
+      "api_contracts": [],
+      "integration_points": [],
+      "complexity": "low",
+      "priority": 10,
+      "notes": [
+        "Pure utility functions with no side effects",
+        "No external dependencies except Luxon",
+        "Constants are frozen/enumerated for type safety"
+      ]
+    }
+  ],
+  "dependency_graph": {
+    "document-management": {
+      "depends_on": [
+        "document-processing-api-client",
+        "user-service-api-client",
+        "state-management",
+        "document-viewing-and-editing",
+        "shared-ui-components",
+        "authentication-and-authorization",
+        "internationalization",
+        "utility-functions"
+      ]
+    },
+    "document-type-management": {
+      "depends_on": [
+        "document-processing-api-client",
+        "user-service-api-client",
+        "state-management",
+        "shared-ui-components",
+        "authentication-and-authorization",
+        "internationalization",
+        "utility-functions"
+      ]
+    },
+    "document-viewing-and-editing": {
+      "depends_on": [
+        "document-processing-api-client",
+        "state-management",
+        "shared-ui-components",
+        "internationalization",
+        "utility-functions"
+      ]
+    },
+    "document-processing-api-client": {
+      "depends_on": [
+        "authentication-and-authorization"
+      ]
+    },
+    "user-service-api-client": {
+      "depends_on": [
+        "authentication-and-authorization"
+      ]
+    },
+    "state-management": {
+      "depends_on": [
+        "document-processing-api-client",
+        "user-service-api-client"
+      ]
+    },
+    "shared-ui-components": {
+      "depends_on": [
+        "internationalization",
+        "utility-functions"
+      ]
+    },
+    "authentication-and-authorization": {
+      "depends_on": []
+    },
+    "internationalization": {
+      "depends_on": []
+    },
+    "utility-functions": {
+      "depends_on": []
+    }
+  },
+  "recommendations": {
+    "suggested_adoption_order": [
+      "1. document-processing-api-client (foundational - all data flows through here)",
+      "2. user-service-api-client (secondary foundation - user/org data)",
+      "3. state-management (infrastructure - manages global app state)",
+      "4. utility-functions (supporting - used throughout)",
+      "5. document-type-management (core domain #1 - defines document processing)",
+      "6. document-management (core domain #2 - main feature, depends on document-type)",
+      "7. document-viewing-and-editing (UI layer - depends on document-management)",
+      "8. shared-ui-components (UI layer - reusable)",
+      "9. authentication-and-authorization (cross-cutting - already well-defined by Auth0)",
+      "10. internationalization (cross-cutting - already well-defined by next-intl)"
+    ],
+    "high_priority_modules": [
+      "document-processing-api-client",
+      "document-type-management",
+      "document-management",
+      "document-viewing-and-editing"
+    ],
+    "warnings": [
+      "document-viewing-and-editing has heavy integration with external @netsmile/page-edit-component library - any changes to that library will require updates",
+      "document-processing-api-client has 40+ API methods - consider splitting into separate clients (DocumentsClient, PromptsClient) for better maintainability",
+      "state-management uses vanilla Zustand stores - document initialization logic scattered across multiple files, consider consolidating store initialization",
+      "Error handling classes are well-defined but could benefit from standardized error codes for better client-side handling",
+      "No TypeScript strict null checks in some stores (rawDocument: any in document-data-store.ts:11) - should be properly typed"
+    ]
+  }
+}
